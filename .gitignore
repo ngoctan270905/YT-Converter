@@ -1,0 +1,21 @@
+# Environment variables
+# Virtual environment
+venv/
+venv312/
+.venv/
+.env
+
+# Python artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# IDE files
+.idea/
+*.swp
+*.swo
+
+# Logs
+logs/
+logs/app.log
