@@ -41,9 +41,6 @@ app = FastAPI(
     lifespan=lifespan,
     docs_url="/docs",
     redoc_url="/redoc",
-    openapi_tags=[
-        {"name": "Health Check", "description": "Endpoints để giám sát hệ thống"}
-    ]
 )
 
 # Mount static files (for avatars etc.)
@@ -111,14 +108,6 @@ app.add_middleware(RequestIDMiddleware)
 # Tích hợp toàn bộ API v1
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
-@app.get("/", response_model=UnifiedResponse[dict], tags=["System"])
-@limiter.limit("5/minute")
-def read_root(request: Request):
-    logger.info("Root endpoint accessed.")
-    return UnifiedResponse(
-        success=True,
-        data={"message": "Welcome to " + settings.PROJECT_NAME}
-    )
 
 if __name__ == "__main__":
     import uvicorn

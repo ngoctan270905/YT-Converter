@@ -33,6 +33,11 @@ class Settings(BaseSettings):
     ALLOWED_IMAGE_TYPES: set[str] = {"image/jpeg", "image/png", "image/webp", "image/gif"}
     ALLOWED_EXTENSIONS: set[str] = {".jpg", ".jpeg", ".png", ".webp", ".gif"}
 
+    # Multimedia Tools
+    FFMPEG_PATH: str = "F:/ffmpeg/bin"
+    YT_DLP_PATH: str = "yt-dlp"
+    DOWNLOADS_DIR: str = "static/downloads"
+
 
     model_config = SettingsConfigDict(env_file=".env", case_sensitive=True)
 
