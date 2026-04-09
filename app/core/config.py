@@ -26,6 +26,9 @@ class Settings(BaseSettings):
     MONGODB_MAX_RETRIES: int
     MONGODB_RETRY_DELAY: int
     
+    # Redis Settings (for Celery)
+    REDIS_URL: str = "redis://localhost:6379/0"
+    
     # Static Files and Uploads
     STATIC_FILES_URL: str = "http://localhost:8000/static"
     UPLOADS_DIR: str = "static/uploads"
@@ -34,7 +37,7 @@ class Settings(BaseSettings):
     ALLOWED_EXTENSIONS: set[str] = {".jpg", ".jpeg", ".png", ".webp", ".gif"}
 
     # Multimedia Tools
-    FFMPEG_PATH: str = "F:/ffmpeg/bin"
+    FFMPEG_PATH: str = "ffmpeg"
     YT_DLP_PATH: str = "yt-dlp"
     DOWNLOADS_DIR: str = "static/downloads"
 

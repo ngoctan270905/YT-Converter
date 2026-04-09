@@ -1,3 +1,9 @@
+import sys
+import asyncio
+# Fix for Windows asyncio subprocess issue
+if sys.platform == 'win32':
+    asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
+
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, status
 from fastapi.encoders import jsonable_encoder
@@ -19,6 +25,8 @@ from pathlib import Path # New import
 
 # Configure logging before FastAPI app initialization
 configure_logging()
+
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
