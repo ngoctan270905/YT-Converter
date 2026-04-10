@@ -34,24 +34,38 @@ class AudioFormat(BaseModel):
     bitrate: int | str
     ext: str
 
+import re
+
+# Regex Whitelist cho URL: Cho phép các ký tự URL chuẩn, CHẶN dấu cách và ký tự shell nguy hiểm.
+URL_REGEX = r'^https?://[a-zA-Z0-9\-\._~:/\?#\[\]@!\$&\'\(\)\*\+,;=%]+$'
+
 class MediaConvertRequest(BaseModel):
     url: str = Field(..., description="Link video YouTube hoặc nền tảng khác")
     format: MediaFormat = Field(default=MediaFormat.MP3, description="Định dạng đích")
     quality: str = Field(default="best", description="Chất lượng (VD: 1080p cho video, 192k cho audio)")
 
     @model_validator(mode="after")
-    def validate_quality_compatibility(self) -> "MediaConvertRequest":
-        """Kiểm tra xem quality có khớp với định dạng format không."""
+    def validate_request(self) -> "MediaConvertRequest":
+        """
+        Kiểm tra toàn diện tính hợp lệ của yêu cầu.
+        """
+        # 1. Kiểm tra URL an toàn
+        if not re.match(URL_REGEX, self.url):
+            raise ValueError(
+                "URL không hợp lệ. Vui lòng thử lại."
+            )
+
+        # --- 2. Kiểm tra tương thích chất lượng ---
         fmt = self.format
         q = self.quality
 
-        # Nếu là Video
+        # Nếu là Video (MP4, WEBM)
         if fmt in (MediaFormat.MP4, MediaFormat.WEBM):
             if q not in [v.value for v in VideoQuality]:
                 allowed = ", ".join([v.value for v in VideoQuality])
                 raise ValueError(f"Chất lượng '{q}' không hợp lệ cho Video. Các giá trị cho phép: {allowed}")
         
-        # Nếu là Audio
+        # Nếu là Audio (MP3, WAV)
         elif fmt in (MediaFormat.MP3, MediaFormat.WAV):
             if q not in [a.value for a in AudioQuality]:
                 allowed = ", ".join([a.value for a in AudioQuality])
