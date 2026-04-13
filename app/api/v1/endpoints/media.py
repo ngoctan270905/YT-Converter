@@ -19,6 +19,7 @@ def get_media_service():
     repository = MediaRepository(collection)
     return MediaService(repository)
 
+
 # 1. Lấy thông tin video
 @router.get("/info", response_model=UnifiedResponse[MediaInfoResponse])
 async def get_video_info(
@@ -40,14 +41,15 @@ async def get_video_info(
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-# 2. Khởi tạo task chuyển đổi (Async)
+
+# 2. Khởi tạo task chuyển đổi
 @router.post("/convert", response_model=UnifiedResponse[MediaTaskResponse])
 async def convert_media(
     request: MediaConvertRequest,
     media_service: MediaService = Depends(get_media_service)
 ):
     try:
-        task_id = await media_service.start_convert_task(
+        task_id = await media_service.start_convert_task( # Đẩy task vào Celery và lưu MongoDB
             url=request.url,
             target_format=request.format,
             quality_profile=request.quality
@@ -59,6 +61,7 @@ async def convert_media(
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 # 3. Kiểm tra trạng thái Task
 @router.get("/task/{task_id}", response_model=UnifiedResponse[dict])
@@ -72,17 +75,6 @@ async def get_task_status(
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))
 
-# 4. Lấy lịch sử tải xuống
-@router.get("/history", response_model=UnifiedResponse[list[dict]])
-async def get_media_history(
-    limit: int = 20,
-    media_service: MediaService = Depends(get_media_service)
-):
-    try:
-        history = await media_service.get_history(limit)
-        return UnifiedResponse(success=True, message="Lấy lịch sử thành công", data=history)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
 
 # 5. Tải file kết quả
 @router.get("/download/{task_id}")

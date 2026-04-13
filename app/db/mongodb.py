@@ -82,6 +82,17 @@ def get_database():
         raise RuntimeError("Database chưa kết nối")
     return db_manager.client[db_manager.db_name]
 
+def get_database_from_client(client: AsyncMongoClient):
+    """Dùng cho Celery task - lấy từ client được tạo trong task."""
+    return client[db_manager.db_name]
+
+def create_client() -> AsyncMongoClient:
+    return AsyncMongoClient(
+        settings.MONGODB_URL,
+        minPoolSize=settings.MIN_POOL_SIZE,
+        maxPoolSize=settings.MAX_POOL_SIZE,
+        serverSelectionTimeoutMS=5000,
+    )
 
 def get_client():
     """

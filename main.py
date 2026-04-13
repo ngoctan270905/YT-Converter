@@ -1,6 +1,8 @@
 import sys
 import asyncio
-# Fix for Windows asyncio subprocess issue
+import subprocess
+import time
+
 if sys.platform == 'win32':
     asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
 
@@ -22,11 +24,10 @@ from app.middlewares.request_id import RequestIDMiddleware
 from app.api.v1.router import api_router
 from starlette.staticfiles import StaticFiles # New import
 from pathlib import Path # New import
+from app.core.redis_client import redis_client
 
 # Configure logging before FastAPI app initialization
 configure_logging()
-
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -36,9 +37,12 @@ async def lifespan(app: FastAPI):
     logger.info(f"Đảm bảo thư mục uploads '{uploads_path}' tồn tại.")
 
     await connect_to_mongo()
+    # warm up redis connection
+    await redis_client.ping()
     logger.info("Khởi động ứng dụng thành công.")
     yield
     await close_mongo_connection()
+    await redis_client.close()
     logger.info("Ứng dụng đã được tắt.")
 
 # Khởi tạo ứng dụng FastAPI với metadata
@@ -115,8 +119,3 @@ app.add_middleware(RequestIDMiddleware)
 # ---- Routers ----
 # Tích hợp toàn bộ API v1
 app.include_router(api_router, prefix=settings.API_V1_STR)
-
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

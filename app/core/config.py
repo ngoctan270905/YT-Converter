@@ -45,6 +45,7 @@ class Settings(BaseSettings):
     REDIS_BACKEND_URL: str
 
 
+
     model_config = SettingsConfigDict(env_file=".env", case_sensitive=True)
 
 settings = Settings()

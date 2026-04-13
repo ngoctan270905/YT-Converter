@@ -72,4 +72,4 @@ celery_app.conf.update(
 )
 
 # Autodiscover (một nơi duy nhất, bỏ import trực tiếp ở trên)
-celery_app.autodiscover_tasks(["app.tasks"])
+celery_app.autodiscover_tasks(["app.tasks.media_tasks", "app.tasks.cleanup_tasks"])
