@@ -1,6 +1,7 @@
 from enum import Enum
 from pydantic import BaseModel, Field, model_validator
 from typing import Any
+import re
 
 class MediaFormat(str, Enum):
     MP3 = "mp3"
@@ -34,7 +35,6 @@ class AudioFormat(BaseModel):
     bitrate: int | str
     ext: str
 
-import re
 
 # Regex Whitelist cho URL: Cho phép các ký tự URL chuẩn, CHẶN dấu cách và ký tự shell nguy hiểm.
 URL_REGEX = r'^https?://[a-zA-Z0-9\-\._~:/\?#\[\]@!\$&\'\(\)\*\+,;=%]+$'

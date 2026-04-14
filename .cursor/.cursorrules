@@ -1,0 +1,20 @@
+{
+  "rules": [
+    {
+      "description": "Use async/await for I/O operations",
+      "pattern": "subprocess\\.run",
+      "replace": "asyncio.create_subprocess_exec"
+    },
+    {
+      "description": "Follow RORO pattern with Pydantic models",
+      "pattern": "def.*\\(.*str.*\\)",
+      "replace": "def function_name(request: PydanticModel)"
+    },
+    {
+      "description": "Use UUID for file names",
+      "pattern": "filename.*=.*title",
+      "replace": "filename = str(uuid.uuid4())"
+    }
+  ],
+  "instructions": "Refer to AGENTS.md for full project conventions. Optimize for readability and security."
+}

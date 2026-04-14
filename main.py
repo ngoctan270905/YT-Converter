@@ -24,7 +24,7 @@ from app.middlewares.request_id import RequestIDMiddleware
 from app.api.v1.router import api_router
 from starlette.staticfiles import StaticFiles # New import
 from pathlib import Path # New import
-from app.core.redis_client import redis_client
+from app.core.redis_client import get_redis_client
 
 # Configure logging before FastAPI app initialization
 configure_logging()
@@ -38,11 +38,12 @@ async def lifespan(app: FastAPI):
 
     await connect_to_mongo()
     # warm up redis connection
-    await redis_client.ping()
+    redis = get_redis_client()
+    await redis.ping()
     logger.info("Khởi động ứng dụng thành công.")
     yield
     await close_mongo_connection()
-    await redis_client.close()
+    await redis.close()
     logger.info("Ứng dụng đã được tắt.")
 
 # Khởi tạo ứng dụng FastAPI với metadata
