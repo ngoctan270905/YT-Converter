@@ -1,7 +1,7 @@
 import asyncio
 from typing import Optional
 from loguru import logger
-from pymongo import AsyncMongoClient, uri_parser
+from pymongo import AsyncMongoClient, MongoClient, uri_parser
 from app.core.config import settings
 
 
@@ -82,12 +82,22 @@ def get_database():
         raise RuntimeError("Database chưa kết nối")
     return db_manager.client[db_manager.db_name]
 
-def get_database_from_client(client: AsyncMongoClient):
-    """Dùng cho Celery task - lấy từ client được tạo trong task."""
+def get_database_from_client(client):
+    """Dùng cho Celery task - lấy từ client được tạo trong task (sync hoặc async)."""
     return client[db_manager.db_name]
 
 def create_client() -> AsyncMongoClient:
+    """Create async MongoDB client for FastAPI."""
     return AsyncMongoClient(
+        settings.MONGODB_URL,
+        minPoolSize=settings.MIN_POOL_SIZE,
+        maxPoolSize=settings.MAX_POOL_SIZE,
+        serverSelectionTimeoutMS=5000,
+    )
+
+def create_sync_client() -> MongoClient:
+    """Create sync MongoDB client for Celery tasks."""
+    return MongoClient(
         settings.MONGODB_URL,
         minPoolSize=settings.MIN_POOL_SIZE,
         maxPoolSize=settings.MAX_POOL_SIZE,

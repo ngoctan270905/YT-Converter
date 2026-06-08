@@ -77,7 +77,7 @@ async def get_task_status(
 
 
 # 5. Tải file kết quả
-@router.get("/download/{task_id}")
+@router.get("/download/{task_id}", response_class=FileResponse)
 async def download_file(
     task_id: str,
     media_service: MediaService = Depends(get_media_service)

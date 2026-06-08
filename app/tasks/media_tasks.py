@@ -1,5 +1,5 @@
 from app.core.celery_app import celery_app
-from app.db.mongodb import create_client, get_database_from_client
+from app.db.mongodb import create_sync_client, get_database_from_client
 from app.repositories.media_repository import MediaRepository
 from app.services.media_service import MediaService
 
@@ -28,7 +28,7 @@ def download_video_task(self, url: str, target_format: str, quality_profile: str
     task_id = self.request.id
 
     # SYNC execution - no async loop needed
-    client = create_client()
+    client = create_sync_client()
     try:
         db = get_database_from_client(client)
         repo = MediaRepository(db["media_tasks"])

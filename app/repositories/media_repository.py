@@ -1,5 +1,6 @@
-from typing import Optional, List
+from typing import Optional, List, Union
 from pymongo.asynchronous.collection import AsyncCollection
+from pymongo.collection import Collection
 
 class MediaRepository:
     """
@@ -7,7 +8,7 @@ class MediaRepository:
     Tuân thủ nghiêm ngặt repository_rules.md.
     """
 
-    def __init__(self, collection: AsyncCollection):
+    def __init__(self, collection: Union[AsyncCollection, Collection]):
         """
         Khởi tạo repository với collection được truyền từ Service/Dependency.
         """
@@ -37,15 +38,11 @@ class MediaRepository:
         """
         Cập nhật thông tin task theo ID (SYNC version cho Celery).
         """
-        import asyncio
-        # Run async method in sync context
-        loop = asyncio.new_event_loop()
-        try:
-            asyncio.set_event_loop(loop)
-            result = loop.run_until_complete(self.update_task(task_id, data))
-            return result
-        finally:
-            loop.close()
+        result = self.collection.update_one(
+            {"_id": task_id},
+            {"$set": data}
+        )
+        return result.modified_count > 0
 
 
     async def get_task_by_id(self, task_id: str) -> Optional[dict]:
@@ -53,6 +50,16 @@ class MediaRepository:
         Lấy dữ liệu thô của một task.
         """
         task = await self.collection.find_one({"_id": task_id})
+        if task and "_id" in task:
+            task["_id"] = str(task["_id"])
+        return task
+
+
+    def get_task_by_id_sync(self, task_id: str) -> Optional[dict]:
+        """
+        Lấy dữ liệu thô của một task (SYNC version).
+        """
+        task = self.collection.find_one({"_id": task_id})
         if task and "_id" in task:
             task["_id"] = str(task["_id"])
         return task

@@ -1,4 +1,4 @@
-import redis.asyncio as redis
+import redis.asyncio as redis_async
 import redis
 from app.core.config import settings
 
@@ -9,7 +9,7 @@ def get_redis_client():
     """Get async Redis client."""
     global _async_redis_client
     if _async_redis_client is None:
-        _async_redis_client = redis.Redis.from_url(
+        _async_redis_client = redis_async.Redis.from_url(
             settings.REDIS_URL,
             decode_responses=True,
         )

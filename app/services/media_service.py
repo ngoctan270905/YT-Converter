@@ -180,12 +180,13 @@ class MediaService:
         Raises:
             Exception: Nếu không thể tạo task trong DB
         """
+        import uuid
         from app.tasks.media_tasks import download_video_task
 
-        # Đẩy task vào Celery
-        task = download_video_task.delay(url, target_format.value, quality_profile)
-        task_id = task.id
+        # 1. Generate task_id first
+        task_id = str(uuid.uuid4())
 
+        # 2. Persist to MongoDB first (status: pending)
         task_data = {
             "_id": task_id,
             "url": url,
@@ -194,6 +195,21 @@ class MediaService:
             "status": "pending",
         }
         await self._repository.create_task(task_data)
+
+        # 3. Enqueue to Celery
+        try:
+            download_video_task.apply_async(
+                args=[url, target_format.value, quality_profile],
+                task_id=task_id
+            )
+        except Exception as e:
+            # If Celery enqueue fails (e.g. broker down), update DB and re-raise
+            await self._repository.update_task(task_id, {
+                "status": "failed",
+                "error_message": f"Failed to enqueue task: {str(e)}"
+            })
+            raise
+
         return task_id
 
 
@@ -714,3 +730,5 @@ class MediaService:
         await self.redis.set(f"task_progress:{task_id}", 100.0)
 
         return result
+        return returncode, "\n".join(stdout_logs), ""
+
